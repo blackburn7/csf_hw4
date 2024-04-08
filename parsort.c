@@ -92,15 +92,9 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     exit(0);
   }
 
-
-  // parent process
-  merge_sort(arr, mid, end, threshold);
-
   // have parent wait for child completion
   pid_t actual_pid1 = waitpid(pid1, &wstatus1, 0);
   pid_t actual_pid2 = waitpid(pid2, &wstatus2, 0);
-
-
 
   if (actual_pid1 == -1) {
     // handle waitpid failure
