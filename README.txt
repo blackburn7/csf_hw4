@@ -1,8 +1,14 @@
 CONTRIBUTIONS
 
-atticus:
+atticus:   
+    - implemented all error handling
+    - debugged issues with indexing
+    - dubugged issues with segment faults
 
 matthew:
+    - conducted experiment
+    - implemented forking functionality
+    - implemented memory mapping
 
 
 REPORT
