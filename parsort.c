@@ -139,8 +139,10 @@ int main(int argc, char **argv) {
   }
 
   // open the file
+  printf("Trying to open file: %s\n", filename);
   int fd = open(filename, O_RDWR);
   if (fd < 0) {
+    perror("open");
     return 3;
   }
 
