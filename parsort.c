@@ -136,20 +136,20 @@ int main(int argc, char **argv) {
   char *end;
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
   if (end != argv[2] + strlen(argv[2])) {
-    // TODO: report an error (threshold value is invalid)
+    return 2;
   }
 
   // open the file
   int fd = open(filename, O_RDWR);
   if (fd < 0) {
-    // handle open error and exit
+    return 3;
   }
 
   // use fstat to determine the size of the file
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
-    // handle fstat error and exit
+    return 4;
   }
   size_t f_size_in_bytes = statbuf.st_size;
 
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
   int64_t *data = mmap(NULL, f_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
   if (data == MAP_FAILED) {
-    return 1;
+    return 5;
   }
 
   // sort the data!
