@@ -75,7 +75,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t pid1 = fork();
   if (pid1 == -1) {
     // handle pid error
-    exit(1);
+    fatal("error");
   } else if (pid1 == 0) {
     // child process
     merge_sort(arr, begin, mid, threshold);
@@ -86,7 +86,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if (pid2 == -1) {
     // wait for child 1 to finish if child 2 fails
     waitpid(pid2, &wstatus1, 0);
-    exit(1);
+    fatal("error");
   } else if (pid2 == 0) {
     merge_sort(arr, mid, end, threshold);
     exit(0);
@@ -98,29 +98,29 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 
   if (actual_pid1 == -1) {
     // handle waitpid failure
-    exit(1);
+    fatal("error");
   }
   if (actual_pid2 == -1) {
-    exit(1);
+    fatal("error");
   }
 
   // subprocess error handling
   if (!WIFEXITED(wstatus1)) {
     // handle subprocess crash
-    exit(1);
+    fatal("error");
   }
   if (WEXITSTATUS(wstatus1) != 0) {
     // handle subprocess returns non-zero exit code
-    exit(1);
+    fatal("error");
   }
 
     if (!WIFEXITED(wstatus2)) {
     // handle subprocess crash
-    exit(1);
+    fatal("error");
   }
   if (WEXITSTATUS(wstatus2) != 0) {
     // handle subprocess returns non-zero exit code
-    exit(1);
+    fatal("error");
   }
 
 
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
   // check for correct number of command line arguments
   if (argc != 3) {
     fprintf(stderr, "Usage: %s <filename> <sequential threshold>\n", argv[0]);
-    return 1;
+    fatal("error");
   }
 
   // process command line arguments
@@ -165,14 +165,14 @@ int main(int argc, char **argv) {
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
   if (end != argv[2] + strlen(argv[2])) {
     fprintf(stderr, "Error: threshold is invalid");
-    return 2;
+    fatal("error");
   }
 
   // open the file
   int fd = open(filename, O_RDWR);
   if (fd < 0) {
     fprintf(stderr, "Error: failed to open file");
-    return 3;
+    fatal("error");
   }
 
   // use fstat to determine the size of the file
@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
     fprintf(stderr, "Error: no stat");
-    return 4;
+    fatal("error");
   }
   size_t f_size_in_bytes = statbuf.st_size;
 
@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
   int64_t *data = mmap(NULL, f_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   close(fd);
   if (data == MAP_FAILED) {
-    return 5;
+    fatal("error");
   }
 
   // sort the data!
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
   // unmap and close the file
   if (munmap(data, f_size_in_bytes) == -1) {
     // handle unmapping error
-    return 6;
+    fatal("error");
   }
 
   // TODO: exit with a 0 exit code if sort was successful
