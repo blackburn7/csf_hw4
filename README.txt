@@ -43,4 +43,6 @@ there are few child processes running this qsort of that size array in compariso
 with a threshold value of 524288 has the potential to roughly 4x the number of child processes to sort the array compared to 2097152.
 More child processes means more possibilities to take advantage of the multiple CPU cores and thus multiple parallel processes cutting time.
 The reason we see the times flatten out as the threshold grows smaller than 524288 is likely due to the max delegation potential being reached
-for CPU cores (all cores being used).
+for CPU cores (all cores being used). The reason it may begin to rise slightly as the threshold decreases is because once all the CPU cores are 
+utilized further breaking down the processes as I said do nothing for speeding up the time, thus creating new processes may instead be only
+adding slight additional time at this point.
