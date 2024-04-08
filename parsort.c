@@ -69,36 +69,67 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // recursively sort halves in parallel
   size_t mid = begin + size/2;
 
+  int wstatus1;
+  int wstatus2;
 
-  pid_t pid = fork();
-  if (pid == -1) {
+  pid_t pid1 = fork();
+  if (pid1 == -1) {
     // handle pid error
     exit(1);
-  } else if (pid == 0) {
+  } else if (pid1 == 0) {
     // child process
     merge_sort(arr, begin, mid, threshold);
     exit(0);
   }
+
+  pid_t pid2 = fork();
+  if (pid2 == -1) {
+    // wait for child 1 to finish if child 2 fails
+    waitpid(pid2, &wstatus1, 0);
+    exit(1);
+  } else if (pid2 == 0) {
+    merge_sort(arr, mid, end, threshold);
+    exit(0);
+  }
+
+
   // parent process
   merge_sort(arr, mid, end, threshold);
 
   // have parent wait for child completion
-  int wstatus;
-  pid_t actual_pid = waitpid(pid, &wstatus, 0);
-  if (actual_pid == -1) {
+  pid_t actual_pid1 = waitpid(pid1, &wstatus1, 0);
+  pid_t actual_pid2 = waitpid(pid2, &wstatus2, 0);
+
+
+
+  if (actual_pid1 == -1) {
     // handle waitpid failure
+    exit(1);
+  }
+  if (actual_pid2 == -1) {
     exit(1);
   }
 
   // subprocess error handling
-  if (!WIFEXITED(wstatus)) {
+  if (!WIFEXITED(wstatus1)) {
     // handle subprocess crash
     exit(1);
   }
-  if (WEXITSTATUS(wstatus) != 0) {
+  if (WEXITSTATUS(wstatus1) != 0) {
     // handle subprocess returns non-zero exit code
     exit(1);
   }
+
+    if (!WIFEXITED(wstatus2)) {
+    // handle subprocess crash
+    exit(1);
+  }
+  if (WEXITSTATUS(wstatus2) != 0) {
+    // handle subprocess returns non-zero exit code
+    exit(1);
+  }
+
+
 
 
 
