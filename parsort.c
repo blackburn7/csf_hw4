@@ -67,7 +67,6 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   }
 
   // recursively sort halves in parallel
-
   size_t mid = begin + size/2;
 
 
@@ -155,7 +154,7 @@ int main(int argc, char **argv) {
 
   // map the file into memory using mmap
   int64_t *data = mmap(NULL, f_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-
+  close(fd);
   if (data == MAP_FAILED) {
     return 1;
   }
@@ -167,7 +166,6 @@ int main(int argc, char **argv) {
   if (munmap(data, f_size_in_bytes) == -1) {
     // handle unmapping error
   }
-  close(fd);
 
   // TODO: exit with a 0 exit code if sort was successful
 }
