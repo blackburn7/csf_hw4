@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
   }
 
   // open the file
-  int fd = open(filename, O_RDRW);
+  int fd = open(filename, O_RDWR);
   if (fd < 0) {
     // handle open error and exit
   }
@@ -123,11 +123,20 @@ int main(int argc, char **argv) {
   }
   size_t f_size_in_bytes = statbuf.st_size;
 
-  // TODO: map the file into memory using mmap
+  // map the file into memory using mmap
+  int64_t *data = mmap(NULL, f_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
-  // TODO: sort the data!
+  if (data == MAP_FAILED) {
+    // handle mmap error
+  }
 
-  // TODO: unmap and close the file
+  // sort the data!
+
+  // unmap and close the file
+  if (munmap(data, f_size_in_bytes) == -1) {
+    // handle unmapping error
+  }
+  close(fd);
 
   // TODO: exit with a 0 exit code if sort was successful
 }
