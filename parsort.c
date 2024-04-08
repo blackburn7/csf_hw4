@@ -20,6 +20,7 @@ mblackb8@jh.edu
 #include <stdlib.h>
 #include <string.h>
 
+// comparison function for two integers
 int compare_i64(const void *left_, const void *right_) {
   int64_t left = *(int64_t *)left_;
   int64_t right = *(int64_t *)right_;
@@ -28,6 +29,7 @@ int compare_i64(const void *left_, const void *right_) {
   return 0;
 }
 
+// sort (non merge)
 void seq_sort(int64_t *arr, size_t begin, size_t end) {
   size_t num_elements = end - begin;
   qsort(arr + begin, num_elements, sizeof(int64_t), compare_i64);
@@ -60,13 +62,16 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
   }
 }
 
+// fatal error
 void fatal(const char *msg) __attribute__ ((noreturn));
 
+// fatal error handling
 void fatal(const char *msg) {
   fprintf(stderr, "Error: %s\n", msg);
   exit(1);
 }
 
+// merge sort algorithm
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   assert(end >= begin);
   size_t size = end - begin;
@@ -153,6 +158,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // success!
 }
 
+// main function
 int main(int argc, char **argv) {
   // check for correct number of command line arguments
   if (argc != 3) {
