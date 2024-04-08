@@ -73,6 +73,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t pid = fork();
   if (pid == -1) {
     // handle pid error
+    exit(1);
   } else if (pid == 0) {
     // child process
     merge_sort(arr, begin, mid, threshold);
@@ -86,14 +87,17 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t actual_pid = waitpid(pid, &wstatus, 0);
   if (actual_pid == -1) {
     // handle waitpid failure
+    exit(1);
   }
 
   // subprocess error handling
   if (!WIFEXITED(wstatus)) {
     // handle subprocess crash
+    exit(1);
   }
   if (WEXITSTATUS(wstatus) != 0) {
     // handle subprocess returns non-zero exit code
+    exit(1);
   }
 
 
@@ -135,14 +139,14 @@ int main(int argc, char **argv) {
   char *end;
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
   if (end != argv[2] + strlen(argv[2])) {
+    fprintf(stderr, "Error: threshold is invalid");
     return 2;
   }
 
   // open the file
-  printf("Trying to open file: %s\n", filename);
   int fd = open(filename, O_RDWR);
   if (fd < 0) {
-    perror("open");
+    fprintf(stderr, "Error: failed to open file");
     return 3;
   }
 
@@ -150,6 +154,7 @@ int main(int argc, char **argv) {
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
+    fprintf(stderr, "Error: no stat");
     return 4;
   }
   size_t f_size_in_bytes = statbuf.st_size;
@@ -167,7 +172,9 @@ int main(int argc, char **argv) {
   // unmap and close the file
   if (munmap(data, f_size_in_bytes) == -1) {
     // handle unmapping error
+    return 6;
   }
 
   // TODO: exit with a 0 exit code if sort was successful
+  return 0;
 }
