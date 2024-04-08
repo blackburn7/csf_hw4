@@ -1,4 +1,3 @@
-
 /*
 Assignment 4
 
@@ -31,7 +30,7 @@ int compare_i64(const void *left_, const void *right_) {
 
 void seq_sort(int64_t *arr, size_t begin, size_t end) {
   size_t num_elements = end - begin;
-  qsort(arr + (begin), num_elements, sizeof(int64_t), compare_i64);
+  qsort(arr + begin, num_elements, sizeof(int64_t), compare_i64);
 }
 
 // Merge the elements in the sorted ranges [begin, mid) and [mid, end),
@@ -86,7 +85,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   pid_t pid1 = fork();
   if (pid1 == -1) {
     // handle pid error
-    fatal("error");
+    fatal("failed to create child process 1");
   } else if (pid1 == 0) {
     // child process
     merge_sort(arr, begin, mid, threshold);
@@ -97,7 +96,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if (pid2 == -1) {
     // wait for child 1 to finish if child 2 fails
     waitpid(pid2, &wstatus1, 0);
-    fatal("error");
+    fatal("failed to create child process 2");
   } else if (pid2 == 0) {
     merge_sort(arr, mid, end, threshold);
     exit(0);
@@ -109,39 +108,30 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 
   if (actual_pid1 == -1) {
     // handle waitpid failure
-    fatal("error");
+    fatal("failed to wait for child process 1");
   }
   if (actual_pid2 == -1) {
-    fatal("error");
+    fatal("failed to wait for child process 2");
   }
 
   // subprocess error handling
   if (!WIFEXITED(wstatus1)) {
     // handle subprocess crash
-    fatal("error");
+    fatal("child process 1 crashed");
   }
   if (WEXITSTATUS(wstatus1) != 0) {
     // handle subprocess returns non-zero exit code
-    fatal("error");
+    fatal("child process 1 has an exit code of not 0");
   }
 
-    if (!WIFEXITED(wstatus2)) {
+  if (!WIFEXITED(wstatus2)) {
     // handle subprocess crash
-    fatal("error");
+    fatal("child process 2 crashed");
   }
   if (WEXITSTATUS(wstatus2) != 0) {
     // handle subprocess returns non-zero exit code
-    fatal("error");
+    fatal("child process 2 has an exit code of not 0");
   }
-
-
-
-
-
-
-
-
-
 
   // allocate temp array now, so we can avoid unnecessary work
   // if the malloc fails
@@ -167,7 +157,8 @@ int main(int argc, char **argv) {
   // check for correct number of command line arguments
   if (argc != 3) {
     fprintf(stderr, "Usage: %s <filename> <sequential threshold>\n", argv[0]);
-    fatal("error");
+    fatal("invalid # of command line args");
+    return 1;
   }
 
   // process command line arguments
@@ -175,23 +166,23 @@ int main(int argc, char **argv) {
   char *end;
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
   if (end != argv[2] + strlen(argv[2])) {
-    fprintf(stderr, "Error: threshold is invalid");
-    fatal("error");
+    fatal("threshold is invalid");
+    return 2;
   }
 
   // open the file
   int fd = open(filename, O_RDWR);
   if (fd < 0) {
-    fprintf(stderr, "Error: failed to open file");
-    fatal("error");
+    fatal("failed to open file");
+    return 3;
   }
 
   // use fstat to determine the size of the file
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
-    fprintf(stderr, "Error: no stat");
-    fatal("error");
+    fatal("failure to grab file status");
+    return 4;
   }
   size_t f_size_in_bytes = statbuf.st_size;
 
@@ -199,7 +190,8 @@ int main(int argc, char **argv) {
   int64_t *data = mmap(NULL, f_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   close(fd);
   if (data == MAP_FAILED) {
-    fatal("error");
+    fatal("failed to map to memory");
+    return 5;
   }
 
   // sort the data!
@@ -208,9 +200,9 @@ int main(int argc, char **argv) {
   // unmap and close the file
   if (munmap(data, f_size_in_bytes) == -1) {
     // handle unmapping error
-    fatal("error");
+    fatal("failed to unmap memory");
+    return 6;
   }
 
-  // TODO: exit with a 0 exit code if sort was successful
   return 0;
 }
