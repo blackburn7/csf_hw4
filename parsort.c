@@ -1,3 +1,14 @@
+
+/*
+Assignment 4
+
+Atticus Colwell
+acolwel2@jh.edu
+
+Matthew Blackburn
+mblackb8@jh.edu
+*/
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
