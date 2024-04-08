@@ -70,9 +70,39 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 
   size_t mid = begin + size/2;
 
-  // TODO: parallelize the recursive sorting
-  merge_sort(arr, begin, mid, threshold);
+
+  pid_t pid = fork();
+  if (pid == -1) {
+    // handle pid error
+  } else if (pid == 0) {
+    // child process
+    merge_sort(arr, begin, mid, threshold);
+    exit(0);
+  }
+  // parent process
   merge_sort(arr, mid, end, threshold);
+
+  // have parent wait for child completion
+  int wstatus;
+  pid_t actual_pid = waitpid(pid, &wstatus, 0);
+  if (actual_pid == -1) {
+    // handle waitpid failure
+  }
+
+  // subprocess error handling
+  if (!WIFEXITED(wstatus)) {
+    // handle subprocess crash
+  }
+  if (WEXITSTATUS(wstatus) != 0) {
+    // handle subprocess returns non-zero exit code
+  }
+
+
+
+
+
+
+
 
   // allocate temp array now, so we can avoid unnecessary work
   // if the malloc fails
@@ -131,6 +161,7 @@ int main(int argc, char **argv) {
   }
 
   // sort the data!
+  merge_sort(data, 0, f_size_in_bytes-1, threshold);
 
   // unmap and close the file
   if (munmap(data, f_size_in_bytes) == -1) {
