@@ -20,7 +20,7 @@ int compare_i64(const void *left_, const void *right_) {
 
 void seq_sort(int64_t *arr, size_t begin, size_t end) {
   size_t num_elements = end - begin;
-  qsort(arr + (begin * sizeof(int64_t)), num_elements, sizeof(int64_t), compare_i64);
+  qsort(arr + (begin), num_elements, sizeof(int64_t), compare_i64);
 }
 
 // Merge the elements in the sorted ranges [begin, mid) and [mid, end),
@@ -79,7 +79,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     exit(0);
   }
   // parent process
-  merge_sort(arr, mid + 1, end, threshold);
+  merge_sort(arr, mid, end, threshold);
 
   // have parent wait for child completion
   int wstatus;
